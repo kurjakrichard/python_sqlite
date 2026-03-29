@@ -1,56 +1,68 @@
 import sqlite3
 
 conn = sqlite3.connect(':memory:')
-#conn = sqlite3.connect('company.db')
+#conn = sqlite3.connect('customers.db')
 
 print("Opened database successfully")
 
-many_companies = [
-    (5, 'Paul', 32, 1, 'New York', 10000.00 ),
-    (6, 'Allen', 25, 1, 'Texas', 20000.00 ),
-    (7, 'Teddy', 23, 1, 'Norway', 20000.00 ),
-    (8, 'Mark', 25, 1, 'Rich-Mond', 65000.00 ),
+many_products = [
+    (1, 'Laptop', 1000.00, 'New York', 'ABC Corp'),
+    (2, 'Desktop', 800.00, 'Texas', 'XYZ Inc'),
+    (3, 'Monitor', 200.00, 'Rich-Mond', 'DEF Ltd'),
+]
+many_customers = [
+    (1, 'John', 30, 'New York', '123-456-7890'),
+    (2, 'Jane', 25, 'Texas', '987-654-3210'),
+    (3, 'Mike', 35, 'Rich-Mond', '555-123-4567'),
 ]
 
 cur = conn.cursor()
 
-
+# Create the "product" table
 cur.execute('''
-CREATE TABLE IF NOT EXISTS company (
+CREATE TABLE IF NOT EXISTS product (
+    id      INT PRIMARY KEY     NOT NULL,
+    name    TEXT    NOT NULL,
+    price   REAL     NOT NULL,
+    address CHAR(50),
+    manufacturer TEXT);''')
+
+# Insert data into the "product" table
+cur.executemany("INSERT INTO product (id, name, price, address, manufacturer) VALUES (?, ?, ?, ?, ?)", many_products)
+
+# Create the "customers" table
+cur.execute('''
+CREATE TABLE IF NOT EXISTS customers (
     id      INT PRIMARY KEY     NOT NULL,
     name    TEXT    NOT NULL,
     age     INT     NOT NULL,
-    active  NULL,
     address CHAR(50),
-    salary REAL);''')
+    phone   TEXT);''')
 
-print("Table created successfully")
-cur.executemany("INSERT INTO company VALUES (?,?,?,?,?,?)", many_companies)
+# Insert data into the "customers" table
 
+cur.executemany("INSERT INTO customers (id, name, age, address, phone) VALUES (?, ?, ?, ?, ?)", many_customers)
 
-
-cur.execute("INSERT INTO company (id, name, age, active, address, salary) \
-      VALUES (1, 'Paul', 32, 1, 'New York', 10000.00 )")
-
-cur.execute("INSERT INTO company (id, name, age, active, address, salary) \
-      VALUES (2, 'Allen', 25, 1, 'Texas', 20000.00 )")
-
-cur.execute("INSERT INTO company (id, name, age, active, address, salary) \
-      VALUES (3, 'Teddy', 23, 1, 'Norway', 20000.00 )")
-
-cur.execute("INSERT INTO company (id, name, age, active, address, salary) \
-      VALUES (4, 'Mark', 25, 1, 'Rich-Mond', 65000.00 )")
 
 conn.commit()
 print("Records created successfully")
 
-cur.execute("SELECT id, name, address, salary from company")
+cur.execute("SELECT id, name, price, address, manufacturer from product")
 print("Fetched data from table")
 #print(cur.fetchone()[0])
 items = cur.fetchall()
 for row in items: #cur.fetchall():
    print(row)
 #print(cur.fetchall())
+
+print("Tables created successfully")
+
+# Select data from the "customers" table
+cur.execute("SELECT * FROM customers")
+rows = cur.fetchall()
+
+for row in rows:
+    print(row)
 
 conn.close()
 
